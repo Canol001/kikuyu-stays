@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { Building2, ChevronLeft, ChevronRight, Home, Landmark, MapPin, Minus, Navigation, Plus, Search, Trees, type LucideIcon } from 'lucide-react'
 
@@ -64,10 +64,17 @@ function Row({ title, sub, value, set, min = 0, max = 16, disabledPlus }: { titl
   )
 }
 
-export default function SearchPanel({ start, onClose }: { start: Field; onClose: () => void }) {
+export default function SearchPanel({ start, onClose, inline }: { start: Field | null; onClose?: () => void; inline?: boolean }) {
+  const root = useRef<HTMLDivElement>(null)
   const nav = useNavigate()
   const [sp] = useSearchParams()
   const [active, setActive] = useState<Field | null>(start)
+  useEffect(() => {
+    if (!inline) return
+    const h = (e: MouseEvent) => { if (root.current && !root.current.contains(e.target as Node)) setActive(null) }
+    document.addEventListener('mousedown', h)
+    return () => document.removeEventListener('mousedown', h)
+  }, [inline])
   const [area, setArea] = useState(sp.get('area') ?? '')
   const [q, setQ] = useState('')
   const [inD, setIn] = useState(sp.get('in') ?? '')
@@ -91,7 +98,8 @@ export default function SearchPanel({ start, onClose }: { start: Field; onClose:
     if (outD) p.set('out', outD)
     if (guests) p.set('guests', String(guests))
     nav(`/explore?${p.toString()}`)
-    onClose()
+    onClose?.()
+    setActive(null)
   }
   const list = places.filter(p => p.name.toLowerCase().includes(q.toLowerCase()))
   const toggle = (f: Field) => setActive(active === f ? null : f)
@@ -101,7 +109,7 @@ export default function SearchPanel({ start, onClose }: { start: Field; onClose:
     : 'Add guests'
 
   return (
-    <div className={`sx-bar ${active ? 'has-active' : ''}`} role="search">
+    <div ref={root} className={`sx-bar ${active ? 'has-active' : ''}`} role="search">
       <div className={`sx-seg ${active === 'where' ? 'on' : ''}`} onClick={() => toggle('where')} role="button" tabIndex={0}>
         <label htmlFor="sx-q">Where</label>
         <input id="sx-q" autoComplete="off" placeholder="Search destinations" value={active === 'where' ? q || area : area}

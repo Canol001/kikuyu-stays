@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { BadgeCheck, MapPin, Smartphone, ShieldCheck } from 'lucide-react'
-import { Img, PropertyCard, SearchPill, CatIcon } from '../components/ui'
+import { Img, PropertyCard, CatIcon } from '../components/ui'
+import SearchPanel from '../components/SearchPanel'
 import { areas, categories, kes, properties } from '../data'
 
 const areaImg: Record<string, string> = {
@@ -19,7 +20,7 @@ export default function Home() {
         <div className="hero-inner">
           <h1>Find your perfect stay in Kikuyu.</h1>
           <p>Verified apartments, studios, guest houses and holiday homes — hosted by locals who know the area best.</p>
-          <SearchPill />
+          <SearchPanel start={null} inline />
         </div>
       </section>
 
